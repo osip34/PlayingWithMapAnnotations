@@ -10,11 +10,12 @@ import UIKit
 import MapKit
 
 class ViewController: UIViewController, MKMapViewDelegate {
-
+    
     @IBOutlet weak var map: MKMapView!
     
     var arrayOfSelectedAnnotations: [MKAnnotation] = []
-
+    let annotation = MKPointAnnotation()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,37 +28,72 @@ class ViewController: UIViewController, MKMapViewDelegate {
         let region: MKCoordinateRegion = MKCoordinateRegionMake(location, span)
         map.setRegion(region, animated: true)
         
-        let anotation = MKPointAnnotation()
-        anotation.coordinate = location
-        anotation.title = "MY STAFF"
-        anotation.subtitle = "SOMETHING ABOUT IT"
+        //let annotation = MKPointAnnotation()
+        annotation.coordinate = location
+        annotation.title = "MY STAFF"
+        annotation.subtitle = "SOMETHING ABOUT IT"
         
-        let anotation2 = MKPointAnnotation()
-        anotation2.coordinate = location2
-        anotation2.title = "MY STAFF2"
-        anotation2.subtitle = "SOMETHING ABOUT IT2"
+        let annotation2 = MKPointAnnotation()
+        annotation2.coordinate = location2
+        annotation2.title = "MY STAFF2"
+        annotation2.subtitle = "SOMETHING ABOUT IT2"
         
-
         
-        let anotations: [MKAnnotation] = [anotation, anotation2]
-        map.addAnnotations(anotations)
-
+        
+        let annotations: [MKAnnotation] = [annotation, annotation2]
+        map.addAnnotations(annotations)
+        
     }
     
     //MARK: map delegate methods
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        let anotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "Reuse")
-        anotationView.canShowCallout = true
-        return anotationView
+        let identifier = "Reuse"
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+        
+        if annotationView == nil {
+            annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+            annotationView?.canShowCallout = true
+            
+        } else {
+            annotationView?.annotation = annotation
+        }
+//        let im = UIImage(named: "launching1.jpg")!
+//        annotationView?.image = im
+        return annotationView
     }
     
     
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
-        var anotationDisabled = false
+        // if view.annotation?.coordinate == someCoordinateThatWeNeed {}
         
+        
+        let rect = CGRect(x: 0, y: 0, width: 59, height: 59)
+        let iView = UIImageView(frame: rect)
+        iView.image = UIImage(named: "14315211077656.jpg")
+        view.leftCalloutAccessoryView = iView
+        
+        let im = #imageLiteral(resourceName: "plus-minus-01-512")
+        let btn = UIButton(type: .custom)
+        btn.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+        btn.setImage(im, for: .normal)
+        
+        view.rightCalloutAccessoryView = btn
+
+        
+    }
+    
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        
+        control.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 6, options: .allowUserInteraction, animations: {
+            control.transform = CGAffineTransform.identity
+        }, completion: nil)
+            
+            var annotationDeselected = false
+            
             for selectedAnotation in arrayOfSelectedAnnotations {
                 
                 if selectedAnotation.title! == view.annotation?.title! {
@@ -69,27 +105,15 @@ class ViewController: UIViewController, MKMapViewDelegate {
                             break;
                         }
                     }
-                    anotationDisabled = true
+                    annotationDeselected = true
                 }
             }
-        if !anotationDisabled {
-            (view as! MKPinAnnotationView).pinTintColor = UIColor.black
-            arrayOfSelectedAnnotations.append(view.annotation!)
-        }
-
-        
-        // if view.annotation?.coordinate == someCoordinateThatWeNeed {}
-        
-        
-        let rect = CGRect(x: 0, y: 0, width: 59, height: 59)
-        let iView = UIImageView(frame: rect)
-        iView.image = UIImage(named: "14315211077656.jpg")
-        view.leftCalloutAccessoryView = iView
-        
-        
-        print(map.selectedAnnotations)
+            if !annotationDeselected {
+                (view as! MKPinAnnotationView).pinTintColor = UIColor.black
+                arrayOfSelectedAnnotations.append(view.annotation!)
+            }
         
     }
-
+    
 }
 
